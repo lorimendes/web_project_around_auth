@@ -3,6 +3,7 @@ import Header from "./Header/Header.jsx";
 import Main from "./Main/Main.jsx";
 import Footer from "./Footer/Footer.jsx";
 import { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import { api } from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
@@ -57,8 +58,8 @@ function App() {
       const updatedCard = await api.updateLike(cardToUpdate);
       setCards((state) =>
         state.map((currentCard) =>
-          currentCard._id == cardToUpdate._id ? updatedCard : currentCard
-        )
+          currentCard._id == cardToUpdate._id ? updatedCard : currentCard,
+        ),
       );
     } catch (error) {
       console.log(error);
@@ -77,7 +78,7 @@ function App() {
         .deleteCard(cardToDelete)
         .then(() => {
           setCards(
-            cards.filter((currentCard) => currentCard._id !== cardToDelete._id)
+            cards.filter((currentCard) => currentCard._id !== cardToDelete._id),
           );
           setPopup(null);
         })
@@ -120,18 +121,25 @@ function App() {
         isLoading,
       }}
     >
-      <div className="page">
-        <Header src={logo} />
-        <Main
-          onOpenPopup={setPopup}
-          onClosePopup={() => setPopup(null)}
-          popup={popup}
-          cards={cards}
-          onCardLike={handleCardLike}
-          onClickDeleteCard={handleCardDeleteClick}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="page">
+              <Header src={logo} />
+              <Main
+                onOpenPopup={setPopup}
+                onClosePopup={() => setPopup(null)}
+                popup={popup}
+                cards={cards}
+                onCardLike={handleCardLike}
+                onClickDeleteCard={handleCardDeleteClick}
+              />
+              <Footer />
+            </div>
+          }
         />
-        <Footer />
-      </div>
+      </Routes>
     </CurrentUserContext.Provider>
   );
 }
