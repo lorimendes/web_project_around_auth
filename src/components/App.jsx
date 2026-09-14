@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { api } from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
+import Login from "../../../Práticas/frontend-authorization-demo-pt/src/components/Login.jsx";
 
 function App() {
   const [currentUser, setCurrentUser] = useState({});
@@ -122,6 +123,8 @@ function App() {
       }}
     >
       <Routes>
+        <Route path="/signup" element={<Register />}></Route>
+        <Route path="/signip" element={<Login />}></Route>
         <Route
           path="/"
           element={
