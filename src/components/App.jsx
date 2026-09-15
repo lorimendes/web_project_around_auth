@@ -2,13 +2,14 @@ import logo from "../images/Vector.png";
 import Header from "./Header/Header.jsx";
 import Main from "./Main/Main.jsx";
 import Footer from "./Footer/Footer.jsx";
+import ProtectedRoute from "./ProtectedRoute";
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { api } from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
-import Login from "../../../Práticas/frontend-authorization-demo-pt/src/components/Login.jsx";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
   const [popup, setPopup] = useState(null);
   const [cards, setCards] = useState([]);
@@ -120,26 +121,44 @@ function App() {
         handleAddCardSubmit,
         handleCardDeleteConfirm,
         isLoading,
+        isLoggedIn,
       }}
     >
       <Routes>
-        <Route path="/signup" element={<Register />}></Route>
-        <Route path="/signip" element={<Login />}></Route>
+        <Route
+          path="/signup"
+          element={
+            <ProtectedRoute anonymous>
+              <Register />
+            </ProtectedRoute>
+          }
+        ></Route>
+        <Route
+          path="/signip"
+          element={
+            <ProtectedRoute anonymous>
+              <Login />
+            </ProtectedRoute>
+          }
+        ></Route>
+
         <Route
           path="/"
           element={
-            <div className="page">
-              <Header src={logo} />
-              <Main
-                onOpenPopup={setPopup}
-                onClosePopup={() => setPopup(null)}
-                popup={popup}
-                cards={cards}
-                onCardLike={handleCardLike}
-                onClickDeleteCard={handleCardDeleteClick}
-              />
-              <Footer />
-            </div>
+            <ProtectedRoute>
+              <div className="page">
+                <Header src={logo} />
+                <Main
+                  onOpenPopup={setPopup}
+                  onClosePopup={() => setPopup(null)}
+                  popup={popup}
+                  cards={cards}
+                  onCardLike={handleCardLike}
+                  onClickDeleteCard={handleCardDeleteClick}
+                />
+                <Footer />
+              </div>
+            </ProtectedRoute>
           }
         />
       </Routes>
