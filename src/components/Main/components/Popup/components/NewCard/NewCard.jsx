@@ -14,7 +14,7 @@ function NewCard() {
   };
 
   useEffect(() => {
-    const formValidator = new FormValidator(formRef.current);
+    const formValidator = new FormValidator(formRef.current, "popup");
     formValidator.enableValidation();
   }, []);
 

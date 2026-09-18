@@ -1,10 +1,15 @@
-import logo from "../images/Vector.png";
+import Auth from "./Auth/Auth.jsx";
+import Login from "./Auth/components/Login.jsx";
+import Register from "./Auth/components/Register.jsx";
+import InfoTooltip from "./Auth/components/InfoTooltip.jsx";
+import successIcon from "../images/success-status.png";
+import errorIcon from "../images/error-status.png";
 import Header from "./Header/Header.jsx";
 import Main from "./Main/Main.jsx";
 import Footer from "./Footer/Footer.jsx";
 import ProtectedRoute from "./ProtectedRoute";
 import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { api } from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
@@ -20,10 +25,35 @@ function App() {
     (async () => {
       await api.getProfile().then((userInfo) => {
         setCurrentUser(userInfo);
-        console.log(userInfo.avatar);
       });
     })();
   }, []);
+
+  const handleRegistration = () => {
+    setIsLoading(true);
+    setPopup({
+      children: (
+        <InfoTooltip
+          statusIcon={errorIcon}
+          message={"Ops, algo saiu deu errado! Por favor, tente novamente."}
+        />
+      ),
+    });
+    setIsLoading(false);
+  };
+
+  const handleLogin = () => {
+    setIsLoading(true);
+    setPopup({
+      children: (
+        <InfoTooltip
+          statusIcon={successIcon}
+          message={"Vitória! Você precisa se registrar."}
+        />
+      ),
+    });
+    setIsLoading(false);
+  };
 
   const handleUpdateUser = (userInfo) => {
     setIsLoading(true);
@@ -129,25 +159,39 @@ function App() {
           path="/signup"
           element={
             <ProtectedRoute anonymous>
-              <Register />
+              <Auth
+                title={"Inscrever-se"}
+                onSubmit={handleRegistration}
+                popup={popup}
+                onClosePopup={() => setPopup(null)}
+              >
+                <Register />
+              </Auth>
             </ProtectedRoute>
           }
         ></Route>
         <Route
-          path="/signip"
+          path="/signin"
           element={
             <ProtectedRoute anonymous>
-              <Login />
+              <Auth
+                title={"Entrar"}
+                onSubmit={handleLogin}
+                popup={popup}
+                onClosePopup={() => setPopup(null)}
+              >
+                <Login />
+              </Auth>
             </ProtectedRoute>
           }
-        ></Route>
+        />
 
         <Route
           path="/"
           element={
             <ProtectedRoute>
               <div className="page">
-                <Header src={logo} />
+                <Header />
                 <Main
                   onOpenPopup={setPopup}
                   onClosePopup={() => setPopup(null)}
@@ -159,6 +203,16 @@ function App() {
                 <Footer />
               </div>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            isLoggedIn ? (
+              <Navigate to="/" replace />
+            ) : (
+              <Navigate to="/signin" replace />
+            )
           }
         />
       </Routes>

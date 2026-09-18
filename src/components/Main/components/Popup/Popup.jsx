@@ -1,10 +1,13 @@
-function Popup(props) {
-  const { title, children, onClose } = props;
+function Popup({ title, children, onClose, isMessagePopup }) {
   return (
-    <div className={`popup ${!title ? "popup_function_open-image" : ""}`}>
+    <div
+      className={`popup ${!title && !isMessagePopup ? "popup_function_open-image" : ""}`}
+    >
       <div
         className={`popup__container ${
-          !title ? "popup__container-image" : "popup__container-form"
+          !title && !isMessagePopup
+            ? "popup__container-image"
+            : "popup__container-white"
         }`}
       >
         {title && <h2 className="popup__title">{title}</h2>}

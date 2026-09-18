@@ -12,7 +12,7 @@
   display: block;
 }
 
-.popup__container-form {
+.popup__container-white {
   background-color: #fff;
   position: fixed;
   top: 50%;
@@ -23,6 +23,20 @@
   border-radius: 10px;
   box-shadow: 0px 0px 25px 0px #00000026;
   color: black;
+}
+
+.popup__container-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 0 24px;
+}
+
+.popup__status-img {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 0;
 }
 
 .popup__title {
