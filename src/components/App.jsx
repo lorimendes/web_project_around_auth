@@ -198,6 +198,7 @@ function App() {
         handleCardDeleteConfirm,
         isLoading,
         isLoggedIn,
+        setIsLoggedIn,
       }}
     >
       <Routes>
