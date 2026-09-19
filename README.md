@@ -21,7 +21,7 @@ O **Around The U.S.** é uma página desenvolvida em React que permite aos usuá
 
 ## 🌐 Acesse o site:
 
-https://lorimendes.github.io/web_project_around_express/
+https://lorimendes.github.io/web_project_around_auth/
 
 ## 👩‍💻 Autor
 
