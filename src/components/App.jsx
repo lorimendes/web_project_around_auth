@@ -9,17 +9,22 @@ import Main from "./Main/Main.jsx";
 import Footer from "./Footer/Footer.jsx";
 import ProtectedRoute from "./ProtectedRoute";
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { register, authorize, getUserData } from "../utils/auth.js";
 import { api } from "../utils/api.js";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
 function App() {
+  const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
   const [currentUser, setCurrentUser] = useState({});
   const [popup, setPopup] = useState(null);
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -29,29 +34,52 @@ function App() {
     })();
   }, []);
 
-  const handleRegistration = () => {
-    setIsLoading(true);
+  const triggerPopup = (status) => {
+    let messageInfoTooltip = "";
+    if (status === 200) {
+      messageInfoTooltip = "Deu tudo certo! Você já pode fazer o login.";
+    } else if (status === 400) {
+      messageInfoTooltip = "Ops, um dos campos foi preenchido incorretamente.";
+    } else if (status === 401) {
+      messageInfoTooltip = "E-mail não encontrado.";
+    } else {
+      messageInfoTooltip =
+        "Ops, algo saiu deu errado! Por favor, tente novamente.";
+    }
+
     setPopup({
       children: (
         <InfoTooltip
-          statusIcon={errorIcon}
-          message={"Ops, algo saiu deu errado! Por favor, tente novamente."}
+          statusIcon={status === 200 ? successIcon : errorIcon}
+          message={messageInfoTooltip}
         />
       ),
     });
+  };
+
+  const handleRegistration = async ({ password, email }) => {
+    setIsLoading(true);
+    try {
+      const data = await register({ password, email });
+      triggerPopup(200);
+      navigate("/");
+    } catch (error) {
+      triggerPopup(error.status);
+    }
     setIsLoading(false);
   };
 
-  const handleLogin = () => {
+  const handleLogin = async ({ password, email }) => {
     setIsLoading(true);
-    setPopup({
-      children: (
-        <InfoTooltip
-          statusIcon={successIcon}
-          message={"Vitória! Você precisa se registrar."}
-        />
-      ),
-    });
+    try {
+      const data = await authorize({ password, email });
+      setToken(data.token);
+      const userData = await getUserData(data.token);
+      setEmail(userData.data.email);
+      setIsLoggedIn(true);
+    } catch (error) {
+      triggerPopup(error.status);
+    }
     setIsLoading(false);
   };
 
@@ -191,7 +219,7 @@ function App() {
           element={
             <ProtectedRoute>
               <div className="page">
-                <Header />
+                <Header email={email} />
                 <Main
                   onOpenPopup={setPopup}
                   onClosePopup={() => setPopup(null)}

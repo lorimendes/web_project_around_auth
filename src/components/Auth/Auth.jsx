@@ -8,7 +8,6 @@ function Auth({ title, children, onSubmit, popup, onClosePopup }) {
     email: "",
     password: "",
   });
-
   const formRef = useRef();
 
   const handleChange = (e) => {

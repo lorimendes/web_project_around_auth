@@ -8,19 +8,18 @@ class Api {
     return fetch(url, {
       ...(method && { method: method }),
       headers: {
-        authorization: this.token,
+        authorization: `${this.token}`,
         ...(body && { "Content-Type": "application/json" }),
       },
       ...(body && { body: JSON.stringify(body) }),
-    })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-      })
-      .catch((err) => {
-        console.log("Erro:", err);
-      });
+    }).then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+      const error = new Error(`Error: ${res.status}`);
+      error.status = res.status;
+      throw error;
+    });
   }
 
   getProfile() {
@@ -64,14 +63,14 @@ class Api {
 
     return this._request(
       `${this.baseUrl}/cards/${cardToUpdate._id}/likes`,
-      method
+      method,
     );
   }
 }
 
 const api = new Api(
   "https://around-api.pt-br.tripleten-services.com/v1",
-  "a1ae33fa-92c8-4fb4-90f3-3874e08185b4"
+  "a1ae33fa-92c8-4fb4-90f3-3874e08185b4",
 );
 
 export { api };
