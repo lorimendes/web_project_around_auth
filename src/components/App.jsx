@@ -12,10 +12,10 @@ import { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { register, authorize, getUserData } from "../utils/auth.js";
 import { api } from "../utils/api.js";
+import { setToken, getToken } from "../utils/token";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 
 function App() {
-  const [token, setToken] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState(null);
   const [currentUser, setCurrentUser] = useState({});
@@ -25,14 +25,6 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState(null);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    (async () => {
-      await api.getProfile().then((userInfo) => {
-        setCurrentUser(userInfo);
-      });
-    })();
-  }, []);
 
   const triggerPopup = (status) => {
     let messageInfoTooltip = "";
@@ -73,10 +65,14 @@ function App() {
     setIsLoading(true);
     try {
       const data = await authorize({ password, email });
-      setToken(data.token);
       const userData = await getUserData(data.token);
-      setEmail(userData.data.email);
-      setIsLoggedIn(true);
+      if (userData) {
+        setToken(data.token);
+        setEmail(userData.data.email);
+        setIsLoggedIn(true);
+        const redirectPath = location.state?.from?.pathname || "/";
+        navigate(redirectPath);
+      }
     } catch (error) {
       triggerPopup(error.status);
     }
@@ -168,6 +164,28 @@ function App() {
     api.getCards().then((cardsFromApi) => {
       setCards(cardsFromApi);
     });
+  }, []);
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      return;
+    }
+    (async () => {
+      try {
+        const userData = await getUserData(token);
+        setIsLoggedIn(true);
+        setEmail(userData.data.email);
+
+        const userInfo = await api.getProfile();
+        setCurrentUser(userInfo);
+
+        const cardsFromApi = await api.getCards();
+        setCards(cardsFromApi);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
   return (
