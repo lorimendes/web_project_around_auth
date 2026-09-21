@@ -161,12 +161,6 @@ function App() {
   };
 
   useEffect(() => {
-    api.getCards().then((cardsFromApi) => {
-      setCards(cardsFromApi);
-    });
-  }, []);
-
-  useEffect(() => {
     const token = getToken();
     if (!token) {
       return;
