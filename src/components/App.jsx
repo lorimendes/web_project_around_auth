@@ -9,7 +9,13 @@ import Main from "./Main/Main.jsx";
 import Footer from "./Footer/Footer.jsx";
 import ProtectedRoute from "./ProtectedRoute";
 import { useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { register, authorize, getUserData } from "../utils/auth.js";
 import { api } from "../utils/api.js";
 import { setToken, getToken } from "../utils/token";
@@ -25,6 +31,7 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const triggerPopup = (status) => {
     let messageInfoTooltip = "";
@@ -54,7 +61,7 @@ function App() {
     try {
       const data = await register({ password, email });
       triggerPopup(200);
-      navigate("/");
+      navigate("/signin");
     } catch (error) {
       triggerPopup(error.status);
     }
@@ -65,11 +72,9 @@ function App() {
     setIsLoading(true);
     try {
       const data = await authorize({ password, email });
-      const userData = await getUserData(data.token);
-      if (userData) {
+      if (data) {
         setToken(data.token);
-        setEmail(userData.data.email);
-        setIsLoggedIn(true);
+        await loadUserPage();
         const redirectPath = location.state?.from?.pathname || "/";
         navigate(redirectPath);
       }
@@ -160,26 +165,29 @@ function App() {
     })();
   };
 
-  useEffect(() => {
+  const loadUserPage = async () => {
     const token = getToken();
     if (!token) {
       return;
     }
-    (async () => {
-      try {
-        const userData = await getUserData(token);
-        setIsLoggedIn(true);
-        setEmail(userData.data.email);
+    try {
+      setIsLoggedIn(true);
 
-        const userInfo = await api.getProfile();
-        setCurrentUser(userInfo);
+      const userData = await getUserData(token);
+      setEmail(userData.data.email);
 
-        const cardsFromApi = await api.getCards();
-        setCards(cardsFromApi);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
+      const userInfo = await api.getProfile();
+      setCurrentUser(userInfo);
+
+      const cardsFromApi = await api.getCards();
+      setCards(cardsFromApi);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    loadUserPage();
   }, []);
 
   return (
